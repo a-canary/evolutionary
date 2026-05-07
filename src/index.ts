@@ -21,7 +21,18 @@ export type {
   BreedMethod,
   LogEvent,
   LogEventType,
+  RubricDim,
+  Judgment,
+  TrialResult,
+  GeneValue,
+  Gene,
+  GeneBool,
+  GeneCategorical,
+  GeneFloat,
+  GeneAny,
+  GeneRegistry,
 } from './types.js';
+export { applyGeneRegistry } from './types.js';
 
 export { SHA256EvalCache, NoOpCache } from './cache.js';
 export type { EvalCache } from './cache.js';

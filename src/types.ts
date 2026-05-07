@@ -77,6 +77,84 @@ export type RetireCause =
 
 export type BreedMethod = 'seed' | 'mutate' | 'crossover';
 
+// =============================================================================
+// RubricDim — multi-dimensional fitness scores (m27-research-opt, hermes-evo)
+// Used when a single scalar fitness isn't enough; each dimension is a sub-score.
+// The overall fitness is computed from these, not stored directly.
+// =============================================================================
+
+/** One dimension of a multi-dimensional fitness score */
+export interface RubricDim {
+  [dimension: string]: number; // e.g., { technical_accuracy: 0.85, task_relevance: 0.9 }
+}
+
+/** A single evaluation judgment — the raw output from one judge */
+export interface Judgment {
+  rubric: RubricDim;
+  overall: number;           // composite score [0, 1]
+  reasoning: string;         // judge's explanation
+  model: string;             // e.g., 'opus-4-5-20250514'
+  timestamp: number;         // unix ms
+}
+
+/** Result of one trial (one individual evaluated on one task) */
+export interface TrialResult {
+  trialId: string;
+  individualId: string;
+  taskId: string;
+  judgment: Judgment;
+  latencyMs: number;
+  costUsd?: number;         // optional cost tracking
+  cached?: boolean;
+}
+
+// =============================================================================
+// Gene types — for gene-based config evolution (optimize-no-ledge, memory EAs)
+// A gene is a named, typed dimension of a config genome.
+// =============================================================================
+
+export type GeneValue = boolean | string | number;
+
+export interface Gene {
+  name: string;
+  description: string;
+}
+
+export interface GeneBool extends Gene {
+  kind: 'bool';
+  default: boolean;
+}
+
+export interface GeneCategorical extends Gene {
+  kind: 'categorical';
+  options: string[];
+  default: string;
+}
+
+export interface GeneFloat extends Gene {
+  kind: 'float';
+  min: number;
+  max: number;
+  default: number;
+}
+
+export type GeneAny = GeneBool | GeneCategorical | GeneFloat;
+
+/** A registry of genes that define a config space */
+export interface GeneRegistry {
+  name: string;
+  genes: GeneAny[];
+}
+
+/** Apply a gene registry to a tuple of values — returns a Genome */
+export function applyGeneRegistry(registry: GeneRegistry, values: GeneValue[]): Genome {
+  const g: Genome = { _tuple: values };
+  for (let i = 0; i < registry.genes.length; i++) {
+    g[registry.genes[i].name] = values[i];
+  }
+  return g;
+}
+
 export interface Individual {
   id: string;           // stable: g{gen}_p{index}
   gen: number;          // generation number
@@ -166,13 +244,22 @@ export interface EAConfig {
   select: (population: Individual[], fitnessScores: Map<string, number>) => Individual[];
   shouldTerminate: (gen: number, bestFitness: number, stagnantRounds: number) => boolean;
 
-  // ── Optional hooks ────────────────────────────────────────────────────────
+// ── Optional hooks ───────────────────────────────────────────────────────
   /** Agent decides what to do with a retired artifact (archive, discard, promote) */
   onRetire?: (ind: Individual, cause: RetireCause) => Promise<void>;
   /** Called after each generation completes */
   onGenerationEnd?: (gen: number, best: Individual | null, mean: number) => Promise<void>;
   /** Called after each generation end — agent drives monitoring from this */
   onMonitor?: (state: EARunState) => void;
+
+  // ── Optional gates ──────────────────────────────────────────────────────
+  /**
+   * Optional benchmark gate — a fast smoke test that an individual must pass
+   * before being accepted into the population or before expensive evaluation.
+   * Return true to pass, false to fail and mark invalid.
+   * Used to ensure evolved configs don't regress on established benchmarks.
+   */
+  benchmarkGate?: (ind: Individual) => Promise<boolean>;
 }
 
 // =============================================================================

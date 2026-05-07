@@ -241,8 +241,12 @@ const config: EAConfig = {
 ```typescript
 interface Genome { _text?: string; _yaml?: object; _code?: string; _tuple?: unknown[]; [key: string]: unknown }
 interface Individual { id, gen, status, genome, fitness, metrics, judgeOutput, cached, validationReason, retireCause, parents, breedMethod, createdAt, evaluatedAt }
-interface EARunState { runId, generation, populationSize, evaluatedCount, retiredCount, bestFitness, meanFitness, stagnantRounds, totalEvaluations, cacheHitRate, cacheSize }
+interface EARunState { runId, generation, popSize, evaluatedCount, retiredCount, bestFitness, meanFitness, stagnantRounds, totalEvaluations, cacheHitRate, cacheSize }
 interface EARunResult { runId, generationsCompleted, bestIndividual, bestFitness, totalEvaluations, cacheHitRate, terminated, terminateReason }
+interface RubricDim { [dimension: string]: number }
+interface Judgment { rubric: RubricDim; overall: number; reasoning: string; model: string; timestamp: number }
+interface TrialResult { trialId, individualId, taskId, judgment, latencyMs, costUsd?, cached? }
+type GeneAny = GeneBool | GeneCategorical | GeneFloat  // bool{c}, categorical{options[]}, float{min,max}
 ```
 
 ---
