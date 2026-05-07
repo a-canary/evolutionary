@@ -1,6 +1,6 @@
 # EA Framework
 
-> ⚠️ **BLOCKED** — This library is not yet published. It depends on `opus-judge`, which is not yet public. Do not publish until `opus-judge` is available.
+> ⚠️ **BLOCKED** — This library is not yet published. It depends on `llm-judge`, which is not yet public. Do not publish until `llm-judge` is available.
 
 **A TypeScript library for running Evolutionary Algorithms on LLM artifacts.**
 
@@ -178,7 +178,7 @@ npx ts-node examples/02-config-evolution.ts
 
 `examples/03-pipeline-llm-judge.ts`
 
-Evolves pipeline manifests using an external LLM judge. Shows how to wire in an HTTP-based judge (e.g., Hermes opus-judge skill) and how to handle long-running eval with backoff.
+Evolves pipeline manifests using an external LLM judge. Shows how to wire in an HTTP-based judge (e.g., Hermes llm-judge skill) and how to handle long-running eval with backoff.
 
 ```bash
 npx ts-node examples/03-pipeline-llm-judge.ts

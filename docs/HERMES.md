@@ -114,15 +114,15 @@ async function onRetire(ind: Individual, cause: RetireCause): Promise<void> {
 
 ---
 
-## Connecting to opus-judge
+## Connecting to llm-judge
 
-For LLM-judge pairwise ELO evaluation, use the `opus-judge` skill:
+For LLM-judge pairwise ELO evaluation, use the `llm-judge` skill:
 
 ```typescript
-import { opusJudge } from './opus-judge-client.js';  // agent-implemented
+import { llmJudge } from './llm-judge-client.js';  // agent-implemented
 
 async function evaluate(ind: Individual) {
-  const fitness = await opusJudge.runPairwiseELO(
+  const fitness = await llmJudge.runPairwiseELO(
     candidates: allCurrentPopulation.map(i => i.genome._text),
     judgeModel: 'opus',
   );
@@ -130,7 +130,7 @@ async function evaluate(ind: Individual) {
 }
 ```
 
-The `opus-judge` skill handles round-robin ELO computation. The EA library just calls it and gets a fitness score back.
+The `llm-judge` skill handles round-robin ELO computation. The EA library just calls it and gets a fitness score back.
 
 ---
 
