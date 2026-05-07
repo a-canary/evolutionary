@@ -295,10 +295,73 @@ EA-Heuristic framework — measurable quality signals per artifact type for code
 
 ---
 
+## 7b. starlight-slm
+
+### What It Is
+Schematic-first EA for language model architecture search. **The reference implementation** of the schematic-first pattern: genome = `concepts.yaml` (structured idea), phenotype = generated code. Human-in-the-loop between generations. 4 generations completed.
+
+### Artifacts
+| Path | Description |
+|------|-------------|
+| `starlight-slm/skills/starlight-evolve/SKILL.md` | The evolution skill — variation strategy + concept generation |
+| `starlight-slm/generations/README.md` | Generation storage convention + artifact structure |
+| `starlight-slm/generations/{N}/concepts.yaml` | The genome — 20 concept descriptions per generation |
+| `starlight-slm/generations/{N}/artifacts/{id}/schematic.md` | Phenotype input — describes what to build |
+| `starlight-slm/generations/{N}/artifacts/{id}/metrics.json` | Phenotype output — evaluation results |
+| `starlight-slm/standards/spec.md` | Metric definitions for evaluation |
+
+### Gap vs `evolutionary/src/types.ts`
+
+**Architecture alignment:** PARTIAL — `evolutionary/` does NOT implement the schematic-first pattern natively. It has `Genome._yaml` but no concept of a compile step or separate schematic/artifact phases. That said, `Genome` is opaque JSON so the adapter layer is thin.
+
+**Key mismatches:**
+
+1. **BreedingStrategy enum** — starlight-evolve has 9 named variation strategies (`mutation`, `refinement`, `scaling`, `crossover`, `innovation`, `paradigm_shift`, `simplification`, `distillation`, `optimization`) that drive which LLM prompt is used. `evolutionary/` has `BreedMethod = 'seed' | 'mutate' | 'crossover'` — no strategy subtypes.
+
+2. **SchematicGenome** — `concepts.yaml` is the genome. It is a YAML file with named fields (`architecture`, `novel_pattern`, `key_changes`, `target_params`, `type`). `Genome._yaml` could hold this, but `evolutionary/` has no concept of a separate "schematic" that compiles to "artifact".
+
+3. **3-stage breeding** — starlight's breed pipeline is:
+   ```
+   a. Pick variation strategy (crossover/mutation/etc.)
+   b. Pick 1-2 parents from top-10 ranked
+   c. Generate concept in concepts.yaml
+   ```
+   Then separately:
+   ```
+   d. Generate schematic.md + config.yaml + code from concept
+   ```
+   `evolutionary/` conflates breed + generate into one `breed()` call.
+
+4. **Multi-generation parent pool** — starlight selects parents from top-10 of *last 2 generations*, not just current generation. `evolutionary/` parent selection only sees current population.
+
+5. **No automatic loop** — starlight-evolve is a manual skill triggered after evaluation. `evolutionary/` has `EA.run()` which is automatic. Both are valid; they just serve different workflows.
+
+6. **3 artifact types per concept** — `schematic.md` + `config.yaml` + `main.py/src/`. `evolutionary/` treats genome as single artifact.
+
+### Compatibility
+
+**Partially compatible** — `evolutionary/` could host starlight's workflow as an adapter, but the framework doesn't natively model the schematic→artifact separation or strategy-subtype breeding.
+
+### Migration Steps
+
+1. **Do NOT rewrite starlight-evolve** — it is working, mature, and the schematic-first pattern is correct. The skill is the right abstraction here.
+2. Add `BreedingStrategy` enum to `evolutionary/src/types.ts` — covers all 9 starlight strategies
+3. Add `SchematicGenome` type: `{ _schematic: ConceptYaml; _artifact?: ArtifactFiles }` — explicit genome/phenotype separation
+4. Add `compile?(schematic)` callback to `EAConfig` — converts genome schematic → phenotype artifact
+5. Add `variationStrategy` field to `EAConfig` — picks breeding prompt template
+6. Add multi-generation parent pool support to `select` callback
+7. Create `evolutionary/src/schematic.ts` — adapter for starlight-style schematic-first breeding
+8. Update `HERMES.md`: add starlight as the reference implementation for schematic-first EA, note that `evolutionary/` can host it via adapter
+
+**Effort:** Low — adapter layer, no core changes needed
+
+---
+
 ## Summary: Cross-Project Type Compatibility Matrix
 
 | Project | Uses `evolutionary/` TS lib? | Key Type Gaps | Migration Effort |
 |---------|------------------------------|---------------|-----------------|
+| **starlight-slm** | ⚠️ Partial | SchematicGenome, 3-stage breeding, BreedingStrategy enum, multi-gen parent pool | Low (adapter layer) |
 | anti-sycophancy-benchmark | ❌ No | Complete rewrite needed | Medium (3-5 sprints) |
 | hermes-agent-self-evolution | ❌ No (DSPy) | `RubricDim`, `Constraint`, `benchmarkGate` | Low (additive) |
 | benchmark/memory-bench | ❌ No | Gene system, `benchmarkGate` | Medium (4-6 sprints) |
@@ -311,11 +374,16 @@ EA-Heuristic framework — measurable quality signals per artifact type for code
 
 ## Priority Migration Order
 
-1. **Phase 1 (Immediate):** Add missing types to `evolutionary/src/types.ts`
-   - `RubricDim` (from m27-research-opt)
-   - `TrialResult`, `Judgment` (from m27-research-opt)
-   - `Gene`, `GeneRegistry` interfaces (from optimize-no-ledge)
+0. **Phase 0 (Immediate — Already done in v1.1.0):** Add missing types to `evolutionary/src/types.ts`
+   - `RubricDim`, `Judgment`, `TrialResult` (from m27-research-opt)
+   - `GeneBool`, `GeneCategorical`, `GeneFloat`, `GeneRegistry` (from optimize-no-ledge)
    - `benchmarkGate` field on `EAConfig`
+
+1. **Phase 1 (Next):** Add starlight-slm adapter types to `evolutionary/src/types.ts`
+   - `BreedingStrategy` enum (all 9 starlight strategies)
+   - `ConceptGenome` type for schematic-first EA
+   - `compile?(schematic)` callback on `EAConfig`
+   - Create `src/schematic.ts` — adapter for starlight-style breeding
 
 2. **Phase 2 (Short-term):** Create `src/heuristics.ts` + examples
    - Implement EA-Heuristics as `validate` callbacks
@@ -350,7 +418,9 @@ examples/06-code-quality-evolution.ts    — NEW
 
 ### Modified files
 ```
-src/types.ts          — ADD RubricDim, TrialResult, Judgment, Gene types, benchmarkGate
-src/index.ts          — re-export new modules
-README.md             — ADD m27-research-opt and EA-Heuristics to references
+src/types.ts          — ADD: BreedingStrategy, ConceptGenome, compile callback
+src/index.ts          — re-export new types
+src/schematic.ts      — NEW: starlight schematic-first adapter
+README.md             — ADD starlight-slm to references
+docs/HERMES.md        — UPDATE: add starlight reference, EA-Heuristics, m27 sections
 ```
