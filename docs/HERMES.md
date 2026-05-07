@@ -116,21 +116,31 @@ async function onRetire(ind: Individual, cause: RetireCause): Promise<void> {
 
 ## Connecting to llm-judge
 
-For LLM-judge pairwise ELO evaluation, use the `llm-judge` skill:
+For LLM-judge pairwise ELO evaluation, use the [`llm-judge`](https://github.com/a-canary/llm-judge) npm package or CLI:
+
+```bash
+# CLI — pairwise ELO across population
+llm-judge elo --elo-rank 8 --prompt "Which is more helpful?" *.md
+```
+
+Or import the Python module directly in a evaluate callback:
 
 ```typescript
-import { llmJudge } from './llm-judge-client.js';  // agent-implemented
+import { callLLMJudge } from 'llm-judge';  // Python via subprocess, or use CLI
 
 async function evaluate(ind: Individual) {
-  const fitness = await llmJudge.runPairwiseELO(
-    candidates: allCurrentPopulation.map(i => i.genome._text),
-    judgeModel: 'opus',
+  const candidates = allCurrentPopulation.map(i => i.genome._text);
+  const result = await callLLMJudge(
+    task: 'Which is more helpful?',
+    candidates,  // array of strings
+    model: 'claude-sonnet-4-6',
+    provider: 'cli',
   );
-  return { fitness, metrics: {}, judgeOutput: '' };
+  return { fitness: result.elo, metrics: {}, judgeOutput: '' };
 }
 ```
 
-The `llm-judge` skill handles round-robin ELO computation. The EA library just calls it and gets a fitness score back.
+The `llm-judge` CLI handles round-robin ELO computation. The EA library just calls it and gets a fitness score back.
 
 ---
 
