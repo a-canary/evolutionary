@@ -1,11 +1,11 @@
 {
-  "name": "evolve",
+  "name": "evolutionary",
   "version": "1.0.0",
   "description": "TypeScript library for running Evolutionary Algorithms on LLM artifacts — prompts, skills, configs, pipelines, code",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aaron/evolve"
+    "url": "https://github.com/aaron/evolutionary"
   },
   "keywords": [
     "evolutionary-algorithm",

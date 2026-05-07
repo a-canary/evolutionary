@@ -80,7 +80,7 @@ See `examples/` for full working examples.
 ## Project Structure
 
 ```
-evolve/
+evolutionary/
 ├── src/
 │   ├── ea.ts         # EA orchestrator class + all core types
 │   ├── index.ts      # Public API — re-exports everything
@@ -253,7 +253,7 @@ type GeneAny = GeneBool | GeneCategorical | GeneFloat  // bool{c}, categorical{o
 
 ## Hermes Integration
 
-See `docs/HERMES.md` for how to use this library from within the Hermes agent framework. The EA Framework Hermes skill lives at `~/.hermes/profiles/<profile>/skills/evolve/` and references this repo as the implementation.
+See `docs/HERMES.md` for how to use this library from within the Hermes agent framework. The EA Framework Hermes skill lives at `~/.hermes/profiles/<profile>/skills/evolutionary/` and references this repo as the implementation.
 
 In short, the Hermes skill provides the **design contract** (conventions, terminology, decision wizard, operator prompts), and this repo provides the **runnable implementation** (TypeScript library).
 
