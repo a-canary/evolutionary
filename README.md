@@ -1,5 +1,7 @@
 # EA Framework
 
+> ⚠️ **BLOCKED** — This library is not yet published. It depends on `opus-judge`, which is not yet public. Do not publish until `opus-judge` is available.
+
 **A TypeScript library for running Evolutionary Algorithms on LLM artifacts.**
 
 Evolve prompts, skills, configs, pipelines, and code — with caching, parallelism, backoff, and Hermes integration. No external dependencies.
