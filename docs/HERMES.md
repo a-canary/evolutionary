@@ -1,6 +1,6 @@
 # Hermes Integration Guide
 
-This document explains how the `evolutionary` TypeScript library connects to the `evolutionary` Hermes skill (`~/.hermes/profiles/<profile>/skills/evolutionary/`).
+This document explains how the `evolve` TypeScript library connects to the `evolve` Hermes skill (`~/.hermes/profiles/<profile>/skills/evolve/`).
 
 ---
 
@@ -8,8 +8,8 @@ This document explains how the `evolutionary` TypeScript library connects to the
 
 | Artifact | Location | Purpose |
 |----------|----------|---------|
-| **Hermes Skill** | `~/.hermes/.../skills/evolutionary/` | Design contract: conventions, terminology, decision wizard, operator prompts, cross-project reference |
-| **TypeScript Library** | `~/projects/evolutionary/` | Runnable implementation: EA lifecycle, caching, parallelism, backoff, log schema |
+| **Hermes Skill** | `~/.hermes/.../skills/evolve/` | Design contract: conventions, terminology, decision wizard, operator prompts, cross-project reference |
+| **TypeScript Library** | `~/projects/evolve/` | Runnable implementation: EA lifecycle, caching, parallelism, backoff, log schema |
 
 The skill tells agents **what to do** (conventions, naming, parameters, when to use each operator). The library tells agents **how to execute it** (the actual code).
 
@@ -18,7 +18,7 @@ The skill tells agents **what to do** (conventions, naming, parameters, when to 
 ## Hermes Skill Contents
 
 ```
-evolutionary/
+evolve/
 ├── SKILL.md                           # Main skill — decision wizard + conventions
 └── references/
     ├── starlight-schematic-ea.md     # Starlight's schematic-first pattern
@@ -76,8 +76,8 @@ For long-running EAs (hours to days), use Hermes cron:
     run_id: preamble_abc123
     log_path: /tmp/preamble_abc123/lineage.jsonl
 
-    # Use the evolutionary library:
-    #   import { EA } from '~/projects/evolutionary/src/index.js';
+    # Use the evolve library:
+    #   import { EA } from '~/projects/evolve/src/index.js';
     #
     #   // Reconstruct state from log_path
     #   // Evaluate pending individuals
@@ -85,7 +85,7 @@ For long-running EAs (hours to days), use Hermes cron:
     #
     # If ea.isDone(): produce final report and send to user.
     # Else: continue.
-  skills: [evolutionary]
+  skills: [evolve]
   schedule: "0 */4 * * *"  # every 4 hours
 ```
 

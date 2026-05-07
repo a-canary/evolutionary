@@ -1,8 +1,8 @@
 # Migration Inventory & Gap Analysis
 
-**Reference Framework:** `evolutionary/src/types.ts` (canonical TypeScript EA types)
-**Target Skill:** `scaffold-project` + `sprint` workflow
-**Source Repos:** `anti-sycophancy-benchmark`, `hermes-agent-self-evolution`, `benchmark/memory-bench`, `benchmark/memory-bench/optimize-no-ledge`, `benchmark/memory-bench/evo`, `m27-research-opt`, `webui/EA-HEURISTICS.md`
+**Reference Framework:** `evolve/src/types.ts` (canonical TypeScript EA types)
+**Target Skill:** `evolve` + `sprint` workflow
+**Source Repos:** `anti-sycophancy-benchmark`, `hermes-agent-self-evolution`, `benchmark/memory-bench`, `benchmark/memory-bench/optimize-no-ledge`, `benchmark/memory-bench/evo`, `m27-research-opt`, `webui/EA-HEURISTICS.md`, `starlight-slm`
 
 ---
 
@@ -23,9 +23,9 @@ Anti-sycophancy preamble evolution project. Evolves agent preambles to reduce 4 
 | `BENCHMARK.md` | Full benchmark spec |
 | `EA-learnings.md` | Lessons from running the EA |
 
-### Gap vs `evolutionary/src/types.ts`
+### Gap vs `evolve/src/types.ts`
 
-**Type compatibility:** NONE — this project predates the `evolutionary/` TypeScript library and has its own incompatible Python EA types.
+**Type compatibility:** NONE — this project predates the `evolve/` TypeScript library and has its own incompatible Python EA types.
 
 **Key mismatches:**
 - `Individual` has Python `dict` attributes vs TypeScript `Individual` interface with `_text?`, `_yaml?`, `_code?` discriminated union genome
@@ -34,7 +34,7 @@ Anti-sycophancy preamble evolution project. Evolves agent preambles to reduce 4 
 - No `FitnessResult` wrapper in Python — returns `(score, details)` tuple directly
 - Python uses `best_score` float; TS uses `bestFitness` + `fitness: number | null` on `Individual`
 
-**Migration needed:** Rewrite `preamble_evolution.py` to use `evolutionary/src/` as a library, or port the logic and wrap at the boundary.
+**Migration needed:** Rewrite `preamble_evolution.py` to use `evolve/src/` as a library, or port the logic and wrap at the boundary.
 
 ### Migration Steps
 1. Create `src/preamble_evolution_port.ts` — wraps `preamble_evolution.py` output as `Individual[]` + `EARunResult`
@@ -49,7 +49,7 @@ Anti-sycophancy preamble evolution project. Evolves agent preambles to reduce 4 
 ## 2. hermes-agent-self-evolution
 
 ### What It Is
-DSPy + GEPA evolutionary self-improvement for Hermes Agent skills/prompts/tools. Phase 1 (skills) implemented. Python + DSPy.
+DSPy + GEPA evolve self-improvement for Hermes Agent skills/prompts/tools. Phase 1 (skills) implemented. Python + DSPy.
 
 ### Artifacts
 | Path | Description |
@@ -62,12 +62,12 @@ DSPy + GEPA evolutionary self-improvement for Hermes Agent skills/prompts/tools.
 | `PLAN.md` | Full 5-phase architecture (781 lines) |
 | `generate_report.py` | Report generation |
 
-### Gap vs `evolutionary/src/types.ts`
+### Gap vs `evolve/src/types.ts`
 
-**Architecture alignment:** PARTIAL — uses DSPy (not the TS EA class) for its optimization loop. The `evolutionary/` TS library is NOT the execution engine here; DSPy GEPA is. However, both share the same conceptual EA lifecycle (seed → evaluate → select → breed).
+**Architecture alignment:** PARTIAL — uses DSPy (not the TS EA class) for its optimization loop. The `evolve/` TS library is NOT the execution engine here; DSPy GEPA is. However, both share the same conceptual EA lifecycle (seed → evaluate → select → breed).
 
 **Key mismatches:**
-- DSPy `Signature` and `Module` have no equivalent in TS `evolutionary/`
+- DSPy `Signature` and `Module` have no equivalent in TS `evolve/`
 - `evolution/core/fitness.py` — LLM-as-judge scoring; TS `FitnessResult` is compatible but `fitness.py` has richer rubric scoring
 - `constraints.py` — char limits, caching compat, test suite; TS has no equivalent validation layer
 - No `LogEvent` schema — DSPy has its own telemetry
@@ -76,14 +76,14 @@ DSPy + GEPA evolutionary self-improvement for Hermes Agent skills/prompts/tools.
 **Critical overlap with `m27-research-opt`:**
 - Both use `ARM` concept (variant = a named hypothesis to test)
 - Both have 6-dimension rubric scoring
-- `evolutionary/src/types.ts` has NO `RubricDim` — it only has `FitnessResult { fitness, metrics, judgeOutput }`
+- `evolve/src/types.ts` has NO `RubricDim` — it only has `FitnessResult { fitness, metrics, judgeOutput }`
 
 ### Migration Steps
 1. **Do NOT rewrite DSPy** — this is the primary engine and is actively maintained
-2. **Export fitness schema:** Create `evolutionary/src/fitness.ts` with `RubricDim` interface compatible with both projects
+2. **Export fitness schema:** Create `evolve/src/fitness.ts` with `RubricDim` interface compatible with both projects
 3. Add `EAConfig.validate` callback that checks char limits (≤15KB for skills per PLAN.md)
 4. Add `benchmarkGate` to `EAConfig` — run TBLite/YC-Bench before accepting evolved variant
-5. Create `HERMES.md` doc in `evolutionary/docs/` showing how to wire DSPy as `evaluate` callback
+5. Create `HERMES.md` doc in `evolve/docs/` showing how to wire DSPy as `evaluate` callback
 
 **Effort:** Low — additive types + docs, no rewrite
 
@@ -108,9 +108,9 @@ Memory system benchmark suite comparing hermes, holographic, mem0, obsidian, ke 
 | `memory-bench/plur/` | Plur memory plugin |
 | `memory-bench/OpenViking/` | OpenViking examples |
 
-### Gap vs `evolutionary/src/types.ts`
+### Gap vs `evolve/src/types.ts`
 
-**Framework usage:** NOT using `evolutionary/`. Uses custom Python EA in `optimize-no-ledge/` and `evo/` subdirs.
+**Framework usage:** NOT using `evolve/`. Uses custom Python EA in `optimize-no-ledge/` and `evo/` subdirs.
 
 **Key mismatches:**
 - `optimize-no-ledge/ea_loop.py` — custom EA with own `Genome` class and `Gene` registry
@@ -118,7 +118,7 @@ Memory system benchmark suite comparing hermes, holographic, mem0, obsidian, ke 
 - `evo/ea_genome.py` + `ea_orchestrate.py` — separate EA for memory config evolution
 - `Individual`-equivalent classes in Python are NOT compatible with TS `Individual` interface
 
-**Missing type in `evolutionary/`:**
+**Missing type in `evolve/`:**
 - No concept of `Gene` or `GeneRegistry` — the TS library treats genome as opaque JSON
 - No `benchmarkGate` concept — validate evolved config doesn't regress on benchmark
 
@@ -127,7 +127,7 @@ Memory system benchmark suite comparing hermes, holographic, mem0, obsidian, ke 
 2. Create `benchmarkGate` optional field on `EAConfig`
 3. Port `optimize-no-ledge/genes/gene_registry.py` → TypeScript `GeneRegistry` class
 4. Create example: `examples/04-memory-config-evolution.ts` using `optimize-no-ledge` gene schema
-5. Add `benchmark/memory-bench` as a consumer of `evolutionary/` in `docs/HERMES.md`
+5. Add `benchmark/memory-bench` as a consumer of `evolve/` in `docs/HERMES.md`
 
 **Effort:** Medium — 4-6 sprints
 
@@ -150,7 +150,7 @@ EA optimizing no-ledge memory system configuration. Uses gene-based genome (10 m
 | `kb/` | Knowledge base — iteration logs |
 | `runs/` | Artifact runs |
 
-### Gap vs `evolutionary/src/types.ts`
+### Gap vs `evolve/src/types.ts`
 
 **Direct conflict:** `genes/genome.py` defines its own `Genome` class incompatible with TS `Genome` interface.
 
@@ -192,7 +192,7 @@ EA orchestration for memory-evolution benchmark. Separate Python EA for evolving
 | `ea_runner.py` | Per-generation runner |
 | `run_evo_benchmark.py` | Entry point |
 
-### Gap vs `evolutionary/src/types.ts`
+### Gap vs `evolve/src/types.ts`
 
 **Overlaps with `optimize-no-ledge`:** Both are Python EAs for memory config. `evo/` is newer/more mature.
 
@@ -210,7 +210,7 @@ EA orchestration for memory-evolution benchmark. Separate Python EA for evolving
 ## 6. m27-research-opt
 
 ### What It Is
-MiniMax-M2.7 research optimization via evolutionary arms. 13 rounds completed, winner is `v8-combined-critics` (28/30). TypeScript + bun. **Archive mode.**
+MiniMax-M2.7 research optimization via evolve arms. 13 rounds completed, winner is `v8-combined-critics` (28/30). TypeScript + bun. **Archive mode.**
 
 ### Artifacts
 | Path | Description |
@@ -223,7 +223,7 @@ MiniMax-M2.7 research optimization via evolutionary arms. 13 rounds completed, w
 | `CHOICES.md` | Full project spec |
 | `NEXT.md` | Status (Archive mode) |
 
-### Gap vs `evolutionary/src/types.ts`
+### Gap vs `evolve/src/types.ts`
 
 **`RubricDim` mismatch:**
 ```typescript
@@ -237,7 +237,7 @@ interface RubricDim {
   actionability: number;
 }
 
-// evolutionary/src/types.ts — NO RubricDim at all
+// evolve/src/types.ts — NO RubricDim at all
 // Only: FitnessResult { fitness: number; metrics: Record<string, unknown>; judgeOutput: string }
 ```
 
@@ -254,7 +254,7 @@ interface RubricDim {
 - Cost tracking per trial
 
 ### Migration Steps
-1. Add `RubricDim` to `evolutionary/src/types.ts` — required for multi-dimensional scoring
+1. Add `RubricDim` to `evolve/src/types.ts` — required for multi-dimensional scoring
 2. Add `TrialResult` and `Judgment` interfaces
 3. Add `Arm` as an alias for `Individual` in the context of research optimization
 4. Create `examples/05-research-arm-evolution.ts` — demonstrates Thompson-sampled arm selection
@@ -276,7 +276,7 @@ EA-Heuristic framework — measurable quality signals per artifact type for code
 | `EA-LLM-TASTE.md` | ELO ranking for LLM taste |
 | `CHOICES.md` | Project spec with M-0001 (Director as sole human interface), etc. |
 
-### Gap vs `evolutionary/src/types.ts`
+### Gap vs `evolve/src/types.ts`
 
 **No code to migrate** — this is a design document, not implementation.
 
@@ -287,8 +287,8 @@ EA-Heuristic framework — measurable quality signals per artifact type for code
 
 ### Migration Steps
 1. **No code migration** — document lives in `webui/`
-2. **Add to `evolutionary/docs/HERMES.md`**: document that EA-Heuristics can be used as `validate` or `evaluate` callbacks
-3. Create `evolutionary/src/heuristics.ts` — implement cyclomatic complexity, type hint coverage, docstring coverage checkers
+2. **Add to `evolve/docs/HERMES.md`**: document that EA-Heuristics can be used as `validate` or `evaluate` callbacks
+3. Create `evolve/src/heuristics.ts` — implement cyclomatic complexity, type hint coverage, docstring coverage checkers
 4. Create `examples/06-code-quality-evolution.ts` — evolves code artifact using heuristic validation
 
 **Effort:** Low — 2 sprints
@@ -310,15 +310,15 @@ Schematic-first EA for language model architecture search. **The reference imple
 | `starlight-slm/generations/{N}/artifacts/{id}/metrics.json` | Phenotype output — evaluation results |
 | `starlight-slm/standards/spec.md` | Metric definitions for evaluation |
 
-### Gap vs `evolutionary/src/types.ts`
+### Gap vs `evolve/src/types.ts`
 
-**Architecture alignment:** PARTIAL — `evolutionary/` does NOT implement the schematic-first pattern natively. It has `Genome._yaml` but no concept of a compile step or separate schematic/artifact phases. That said, `Genome` is opaque JSON so the adapter layer is thin.
+**Architecture alignment:** PARTIAL — `evolve/` does NOT implement the schematic-first pattern natively. It has `Genome._yaml` but no concept of a compile step or separate schematic/artifact phases. That said, `Genome` is opaque JSON so the adapter layer is thin.
 
 **Key mismatches:**
 
-1. **BreedingStrategy enum** — starlight-evolve has 9 named variation strategies (`mutation`, `refinement`, `scaling`, `crossover`, `innovation`, `paradigm_shift`, `simplification`, `distillation`, `optimization`) that drive which LLM prompt is used. `evolutionary/` has `BreedMethod = 'seed' | 'mutate' | 'crossover'` — no strategy subtypes.
+1. **BreedingStrategy enum** — starlight-evolve has 9 named variation strategies (`mutation`, `refinement`, `scaling`, `crossover`, `innovation`, `paradigm_shift`, `simplification`, `distillation`, `optimization`) that drive which LLM prompt is used. `evolve/` has `BreedMethod = 'seed' | 'mutate' | 'crossover'` — no strategy subtypes.
 
-2. **SchematicGenome** — `concepts.yaml` is the genome. It is a YAML file with named fields (`architecture`, `novel_pattern`, `key_changes`, `target_params`, `type`). `Genome._yaml` could hold this, but `evolutionary/` has no concept of a separate "schematic" that compiles to "artifact".
+2. **SchematicGenome** — `concepts.yaml` is the genome. It is a YAML file with named fields (`architecture`, `novel_pattern`, `key_changes`, `target_params`, `type`). `Genome._yaml` could hold this, but `evolve/` has no concept of a separate "schematic" that compiles to "artifact".
 
 3. **3-stage breeding** — starlight's breed pipeline is:
    ```
@@ -330,28 +330,28 @@ Schematic-first EA for language model architecture search. **The reference imple
    ```
    d. Generate schematic.md + config.yaml + code from concept
    ```
-   `evolutionary/` conflates breed + generate into one `breed()` call.
+   `evolve/` conflates breed + generate into one `breed()` call.
 
-4. **Multi-generation parent pool** — starlight selects parents from top-10 of *last 2 generations*, not just current generation. `evolutionary/` parent selection only sees current population.
+4. **Multi-generation parent pool** — starlight selects parents from top-10 of *last 2 generations*, not just current generation. `evolve/` parent selection only sees current population.
 
-5. **No automatic loop** — starlight-evolve is a manual skill triggered after evaluation. `evolutionary/` has `EA.run()` which is automatic. Both are valid; they just serve different workflows.
+5. **No automatic loop** — starlight-evolve is a manual skill triggered after evaluation. `evolve/` has `EA.run()` which is automatic. Both are valid; they just serve different workflows.
 
-6. **3 artifact types per concept** — `schematic.md` + `config.yaml` + `main.py/src/`. `evolutionary/` treats genome as single artifact.
+6. **3 artifact types per concept** — `schematic.md` + `config.yaml` + `main.py/src/`. `evolve/` treats genome as single artifact.
 
 ### Compatibility
 
-**Partially compatible** — `evolutionary/` could host starlight's workflow as an adapter, but the framework doesn't natively model the schematic→artifact separation or strategy-subtype breeding.
+**Partially compatible** — `evolve/` could host starlight's workflow as an adapter, but the framework doesn't natively model the schematic→artifact separation or strategy-subtype breeding.
 
 ### Migration Steps
 
 1. **Do NOT rewrite starlight-evolve** — it is working, mature, and the schematic-first pattern is correct. The skill is the right abstraction here.
-2. Add `BreedingStrategy` enum to `evolutionary/src/types.ts` — covers all 9 starlight strategies
+2. Add `BreedingStrategy` enum to `evolve/src/types.ts` — covers all 9 starlight strategies
 3. Add `SchematicGenome` type: `{ _schematic: ConceptYaml; _artifact?: ArtifactFiles }` — explicit genome/phenotype separation
 4. Add `compile?(schematic)` callback to `EAConfig` — converts genome schematic → phenotype artifact
 5. Add `variationStrategy` field to `EAConfig` — picks breeding prompt template
 6. Add multi-generation parent pool support to `select` callback
-7. Create `evolutionary/src/schematic.ts` — adapter for starlight-style schematic-first breeding
-8. Update `HERMES.md`: add starlight as the reference implementation for schematic-first EA, note that `evolutionary/` can host it via adapter
+7. Create `evolve/src/schematic.ts` — adapter for starlight-style schematic-first breeding
+8. Update `HERMES.md`: add starlight as the reference implementation for schematic-first EA, note that `evolve/` can host it via adapter
 
 **Effort:** Low — adapter layer, no core changes needed
 
@@ -359,7 +359,7 @@ Schematic-first EA for language model architecture search. **The reference imple
 
 ## Summary: Cross-Project Type Compatibility Matrix
 
-| Project | Uses `evolutionary/` TS lib? | Key Type Gaps | Migration Effort |
+| Project | Uses `evolve/` TS lib? | Key Type Gaps | Migration Effort |
 |---------|------------------------------|---------------|-----------------|
 | **starlight-slm** | ⚠️ Partial | SchematicGenome, 3-stage breeding, BreedingStrategy enum, multi-gen parent pool | Low (adapter layer) |
 | anti-sycophancy-benchmark | ❌ No | Complete rewrite needed | Medium (3-5 sprints) |
@@ -374,12 +374,12 @@ Schematic-first EA for language model architecture search. **The reference imple
 
 ## Priority Migration Order
 
-0. **Phase 0 (Immediate — Already done in v1.1.0):** Add missing types to `evolutionary/src/types.ts`
+0. **Phase 0 (Immediate — Already done in v1.1.0):** Add missing types to `evolve/src/types.ts`
    - `RubricDim`, `Judgment`, `TrialResult` (from m27-research-opt)
    - `GeneBool`, `GeneCategorical`, `GeneFloat`, `GeneRegistry` (from optimize-no-ledge)
    - `benchmarkGate` field on `EAConfig`
 
-1. **Phase 1 (Next):** Add starlight-slm adapter types to `evolutionary/src/types.ts`
+1. **Phase 1 (Next):** Add starlight-slm adapter types to `evolve/src/types.ts`
    - `BreedingStrategy` enum (all 9 starlight strategies)
    - `ConceptGenome` type for schematic-first EA
    - `compile?(schematic)` callback on `EAConfig`
@@ -403,7 +403,7 @@ Schematic-first EA for language model architecture search. **The reference imple
 
 ## Files to Create/Modify
 
-### New files in `evolutionary/`
+### New files in `evolve/`
 ```
 src/types.ts          — ADD: RubricDim, Judgment, TrialResult, Gene*, benchmarkGate
 src/gene.ts           — NEW: GeneBool, GeneCategorical, GeneFloat classes
@@ -421,6 +421,6 @@ examples/06-code-quality-evolution.ts    — NEW
 src/types.ts          — ADD: BreedingStrategy, ConceptGenome, compile callback
 src/index.ts          — re-export new types
 src/schematic.ts      — NEW: starlight schematic-first adapter
-README.md             — ADD starlight-slm to references
-docs/HERMES.md        — UPDATE: add starlight reference, EA-Heuristics, m27 sections
+README.md             — update project name
+docs/HERMES.md        — update library/skill paths throughout
 ```

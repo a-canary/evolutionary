@@ -2,7 +2,7 @@
  * EA Framework — Public API
  *
  * Import everything from here:
- *   import { EA, EAConfig, Individual, Genome, ... } from 'evolutionary';
+ *   import { EA, EAConfig, Individual, Genome, ... } from 'evolve';
  */
 
 export { EA } from './ea.js';
