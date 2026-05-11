@@ -364,16 +364,21 @@ export class EA extends EventEmitter {
     const promises = Array.from({ length: count }, async (_, i): Promise<Individual | null> => {
       await sem.acquire();
       try {
+        if (survivors.length === 0) {
+          return null;
+        }
         const useCrossover = Math.random() < this.config.crossoverRate && survivors.length >= 2;
         let child: Individual;
 
         if (useCrossover) {
           const [a, b] = pickTwo(survivors);
+          if (!a || !b) return null;
           child = await this.config.crossover(a, b);
           child.breedMethod = 'crossover';
           child.parents = [a.id, b.id];
         } else {
           const parent = rouletteSelect(survivors, new Map(survivors.map(s => [s.id, s.fitness ?? 0])));
+          if (!parent) return null;
           child = await this.config.mutate(parent);
           child.breedMethod = 'mutate';
           child.parents = [parent.id];
