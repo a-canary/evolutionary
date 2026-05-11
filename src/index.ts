@@ -40,3 +40,23 @@ export { LineageLogger } from './logger.js';
 export { withBackoff, sleep } from './backoff.js';
 export { Semaphore } from './semaphore.js';
 export { newId, createIndividual, rouletteSelect, pickTwo, normalizeScore, safeConfig, ts } from './utils.js';
+
+// Schematic-first adapter
+export {
+  BreedingStrategy,
+  SchematicGenome,
+  SchematicSection,
+  SchematicField,
+  CompileResult,
+  ParentPoolEntry,
+  SchematicEAConfig,
+  parseSchematic,
+  serializeSchematic,
+  applyBreedingStrategy,
+  crossoverSchematics,
+  ParentPool,
+  defaultChooseMutationStrategy,
+  buildSchematicMutator,
+  buildSchematicCrossover,
+  buildSchematicSeed,
+} from './schematic.js';
