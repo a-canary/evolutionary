@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Source
+src/
+
+# Build artifacts
+dist/
+
+# Development
+*.log
+*.log.jsonl
+ea_*.log
+lineage_postmortem/
+
+# Cache files
+creativity_*.json
+plugin_*.json
+*.creativity_cache*
+
+# Test
+tests/
+vitest.config.ts
+coverage/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.bak
+*.tmp
