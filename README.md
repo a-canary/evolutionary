@@ -1,5 +1,9 @@
 # EA Framework
 
+[![CI](https://github.com/a-canary/evolutionary/actions/workflows/ci.yml/badge.svg)](https://github.com/a-canary/evolutionary/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/evolutionary)](https://www.npmjs.com/package/evolutionary)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **A TypeScript library for running Evolutionary Algorithms on LLM artifacts.**
 
 Evolve prompts, skills, configs, pipelines, and code — with caching, parallelism, backoff, and Hermes integration. No external dependencies.

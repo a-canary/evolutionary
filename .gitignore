@@ -34,3 +34,11 @@ out/
 
 # archive
 .archive/
+# Runtime caches / state (added during migration)
+creativity_cache_*.json
+creativity_creativity_*.jsonl
+creativity_logs/
+creativity_ea_state.json
+plugin_ea_cache.json
+plugin_ea_state.json
+__pycache__/
