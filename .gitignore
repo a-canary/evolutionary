@@ -34,3 +34,5 @@ out/
 
 # archive
 .archive/
+.env.*
+!.env.example
