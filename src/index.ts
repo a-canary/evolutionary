@@ -41,6 +41,21 @@ export { withBackoff, sleep } from './backoff.js';
 export { Semaphore } from './semaphore.js';
 export { newId, createIndividual, rouletteSelect, pickTwo, normalizeScore, safeConfig, ts } from './utils.js';
 
+// Heuristics — programmatic validate/evaluate callbacks for code quality EA
+export {
+  validateCyclomaticComplexity,
+  validateTypeHintCoverage,
+  validateDocstringCoverage,
+  validateCodeQuality,
+  evaluateCyclomaticComplexity,
+  evaluateTypeHintCoverage,
+  evaluateDocstringCoverage,
+  evaluateCodeQuality,
+  countCyclomaticComplexity,
+  countTypeHintCoverage,
+  countDocstringCoverage,
+} from './heuristics.js';
+
 // Schematic-first adapter
 export {
   BreedingStrategy,
